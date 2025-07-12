@@ -20,5 +20,9 @@
 *.terraform/plugins
 *.terraform/workspaces
 *.terraform/aws/*
-get_datetime/.terraform.tfstate.lock.info
+*/.terraform.tfstate.lock.info
+*/.terraform.tfstate
+*/.terraform.tfstate.backup
+
+
 
