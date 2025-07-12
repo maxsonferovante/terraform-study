@@ -1,0 +1,19 @@
+# Configurações para o alerta de custo AWS
+# Copie este arquivo para terraform.tfvars e configure seus valores
+
+# Região AWS onde os recursos serão criados
+aws_region = "us-east-1"
+
+# Seu número de telefone para receber SMS (formato internacional)
+# Exemplo: "+5511999999999" para um número brasileiro
+phone_number = "+5511999999999"
+
+# Limite de custo em USD para disparar o alerta
+budget_limit = 50.0
+
+# Percentual do orçamento que dispara o alerta (80 = 80%)
+alert_threshold = 80
+
+# Email para receber notificações (opcional)
+# Deixe vazio "" se não quiser receber por email
+email_notification = "seu-email@exemplo.com" 
