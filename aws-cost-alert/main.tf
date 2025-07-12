@@ -47,6 +47,12 @@ variable "email_notification" {
   default     = ""
 }
 
+variable "send_confirmation_sms" {
+  description = "Enviar SMS de confirmação após criação do alerta (true/false)"
+  type        = bool
+  default     = true
+}
+
 # Tópico SNS para notificações de custo
 resource "aws_sns_topic" "cost_alert_topic" {
   name         = "aws-cost-alert-topic"
@@ -170,6 +176,66 @@ resource "aws_sns_topic_policy" "cost_alert_policy" {
 # Obter informações da conta atual
 data "aws_caller_identity" "current" {}
 
+# Recurso para enviar mensagem de confirmação após criação do alerta
+resource "null_resource" "send_confirmation_message" {
+  # Só executa se a confirmação por SMS estiver habilitada
+  count = var.send_confirmation_sms ? 1 : 0
+  
+  # Depende da criação do tópico SNS e da assinatura SMS
+  depends_on = [
+    aws_sns_topic.cost_alert_topic,
+    aws_sns_topic_subscription.cost_alert_sms,
+    aws_sns_topic_policy.cost_alert_policy
+  ]
+  
+  # Executa comando local para enviar mensagem de confirmação
+  provisioner "local-exec" {
+    command = <<-EOF
+      # Aguarda um pouco para garantir que a assinatura SMS esteja ativa
+      sleep 20
+      
+      # Define a data atual para evitar problemas de escape
+      DATA_ATUAL=$(date '+%d/%m/%Y as %H:%M:%S')
+      
+      # Envia mensagem de confirmação
+      aws sns publish \
+        --topic-arn "${aws_sns_topic.cost_alert_topic.arn}" \
+        --message "🎯 ALERTA DE CUSTO AWS ATIVADO!
+
+✅ Sistema de monitoramento configurado com sucesso!
+📱 Número: ${var.phone_number}
+💰 Limite: ${var.budget_limit} USD
+📊 Threshold: ${var.alert_threshold}%
+🌎 Região: ${var.aws_region}
+
+Você receberá alertas quando os custos atingirem ${var.alert_threshold}% do orçamento mensal.
+
+Configurado em: $DATA_ATUAL" \
+        --region "${var.aws_region}" \
+        --subject "Sistema de Alerta de Custo AWS - CONFIRMACAO" \
+        --output text
+      
+      # Verifica se o comando foi executado com sucesso
+      if [ $? -eq 0 ]; then
+        echo "✅ Mensagem de confirmação enviada com sucesso!"
+      else
+        echo "❌ Erro ao enviar mensagem de confirmação"
+        exit 1
+      fi
+    EOF
+  }
+  
+  # Trigger para reexecutar se as variáveis mudarem
+  triggers = {
+    phone_number          = var.phone_number
+    budget_limit          = var.budget_limit
+    alert_threshold       = var.alert_threshold
+    aws_region            = var.aws_region
+    topic_arn             = aws_sns_topic.cost_alert_topic.arn
+    send_confirmation_sms = var.send_confirmation_sms
+  }
+}
+
 # Outputs para mostrar informações importantes
 output "sns_topic_arn" {
   description = "ARN do tópico SNS criado"
@@ -199,4 +265,11 @@ output "budget_limit" {
 output "alert_threshold" {
   description = "Percentual configurado para disparar alertas"
   value       = "${var.alert_threshold}%"
+}
+
+# Output para confirmar que a mensagem foi enviada
+output "confirmation_message_sent" {
+  description = "Confirmação de que a mensagem foi enviada para o número configurado"
+  value       = var.send_confirmation_sms ? "Mensagem de confirmação enviada para ${var.phone_number} após criação do sistema" : "Mensagem de confirmação desabilitada"
+  depends_on  = [null_resource.send_confirmation_message]
 } 

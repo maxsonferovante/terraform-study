@@ -9,6 +9,7 @@ Este projeto Terraform configura um sistema completo de alertas de custo na AWS 
 - **Alertas Email**: Envia notificações por email (opcional)
 - **Múltiplos Thresholds**: Alertas em diferentes percentuais do orçamento
 - **Previsão de Gastos**: Alertas baseados em previsões de custo
+- **Mensagem de Confirmação**: Envia SMS de confirmação automática após criação do sistema
 
 ## Pré-requisitos
 
@@ -67,6 +68,7 @@ terraform apply
 | `alert_threshold` | Percentual para alerta | `80` | Sim |
 | `aws_region` | Região AWS | `"us-east-1"` | Sim |
 | `email_notification` | Email para notificações | `"email@exemplo.com"` | Não |
+| `send_confirmation_sms` | Enviar SMS de confirmação | `true` | Não |
 
 ### Exemplo de Configuração
 
@@ -77,6 +79,7 @@ phone_number = "+5511987654321"
 budget_limit = 100.0
 alert_threshold = 75
 email_notification = "admin@empresa.com"
+send_confirmation_sms = true
 ```
 
 ## Tipos de Notificação
@@ -92,6 +95,12 @@ email_notification = "admin@empresa.com"
 ### 3. **Alerta de Limite Total**
 - Disparado quando atinge 100% do orçamento
 - Alerta crítico de estouro de orçamento
+
+### 4. **Mensagem de Confirmação**
+- Enviada automaticamente após criação do sistema
+- Confirma que o alerta de custo foi configurado com sucesso
+- Inclui informações sobre os parâmetros configurados
+- Pode ser desabilitada definindo `send_confirmation_sms = false`
 
 ## Monitoramento
 
@@ -126,6 +135,7 @@ Após a execução, o Terraform mostrará:
 - **ID da conta AWS**: Para confirmação
 - **Limite configurado**: Valor em USD
 - **Threshold configurado**: Percentual de alerta
+- **Status da mensagem de confirmação**: Informa se foi enviada ou não
 
 ## Importantes Considerações
 
@@ -162,6 +172,18 @@ aws sts get-caller-identity
 1. Verifique se o número está no formato correto
 2. Confirme se sua região AWS suporta SMS
 3. Verifique se não há bloqueios de spam
+
+### Mensagem de confirmação não enviada
+```bash
+# Verificar se a variável está habilitada
+send_confirmation_sms = true
+
+# Verificar se o AWS CLI está configurado corretamente
+aws sts get-caller-identity
+
+# Recriar apenas o recurso de confirmação
+terraform apply -target=null_resource.send_confirmation_message
+```
 
 ## Atualizações
 
