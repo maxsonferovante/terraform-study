@@ -1,0 +1,46 @@
+# Arquivos de credenciais e configurações sensíveis
+terraform.tfvars
+terraform.tfvars.json
+*.auto.tfvars
+*.auto.tfvars.json
+
+# Arquivos de estado do Terraform
+terraform.tfstate
+terraform.tfstate.backup
+*.tfstate
+*.tfstate.backup
+
+# Diretórios do Terraform
+.terraform/
+.terraform.lock.hcl
+
+# Arquivos de log
+*.log
+
+# Arquivos de crash dump
+crash.log
+
+# Arquivos de override
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Arquivos de configuração específicos do usuário
+.terraformrc
+terraform.rc
+
+# Arquivos temporários
+*.tmp
+*.temp
+
+# Arquivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Arquivos de sistema
+.DS_Store
+Thumbs.db 
