@@ -1,0 +1,1 @@
+{"statusCode": 200, "headers": {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Methods": "GET, POST, OPTIONS", "Access-Control-Allow-Headers": "Content-Type"}, "body": "{\"message\": \"Palavra v\u00e1lida recebida e enviada para processamento\", \"palavra\": \"casa\", \"status\": \"processando\"}"}
